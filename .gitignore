@@ -1,0 +1,8 @@
+docker-persistent-data
+.cache-loader
+node_modules/.cache
+*.ini
+.env
+/images
+docker-compose.yml
+fabfile.json

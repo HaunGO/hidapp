@@ -1,0 +1,130 @@
+
+
+body{
+    border:0.5em solid lightgray;
+    padding:0.5em;    
+}
+
+
+h3{
+    font-weight: bold;
+}
+
+
+main{
+    // min-height:100vh;
+    // height:100%;
+    max-width:850px;
+    margin:auto;
+}
+
+button{
+    background-color:teal; 
+    border-radius:4px;
+    color:white;
+    display:inline-block;
+    padding:0.5em 1em;
+    margin:0 0 0.3em 0;
+}
+
+input{
+    border-bottom:2px solid teal;
+    padding: 0 0.5em;
+    margin:0 1em 0em 0.5em;
+}
+label{
+    // padding-right:1em;
+}
+span.infoSpan{
+    border:1px solid olivedrab;
+    border-radius:4px;
+    padding:0.3em 1em;
+    margin:0 0.5 0.5em 0;
+    border-bottom:3px solid olive;
+    display: inline-block;
+    font-weight: bold;
+    font-size:1.1em;
+    font-style:italic;
+}
+
+code{
+    // border:1px solid red;
+    background-color:rgba(olive, 0.1); 
+    font-family: monospace;
+    white-space: pre;
+    font-size:0.5em;
+    display:block;
+    padding:0.5em;
+    margin:0.5em 0;
+}
+
+
+footer{
+}
+
+p{
+
+    // font-size:0.7em;
+}
+pre{
+    font-size:0.5em;
+}
+
+hr{
+    display:block;
+    margin:1em 0;
+} 
+
+section{
+    display:block;
+    width:100%;
+    border:2px solid rgba(olivedrab, 0.2);
+    padding:1em 0.5em;
+    margin:0.5em 0;
+    border-radius:3px;
+    position: relative;
+    &:after{
+        content:'First, connect to dApp.';        
+        display:block;
+        color:gold;
+        font-size:2em;
+        // display:flex;
+        // align-content: center;
+        // justify-content: center;
+        padding-top:2em;
+        text-align:center;
+        text-shadow: 2px 2px darkolivegreen;
+        position: absolute; 
+        top:0; left:0; bottom:0; right:0;
+        height:100%; width:100%;
+        background-color:rgba(0,0,0,0.5);
+    }
+    
+    .connectedToNetwork & {
+        &:after{
+            display:none;
+        }
+    }
+}
+
+
+ 
+#withdrawLoader,
+#transactionLoader{
+    width:1em;
+    height:1em;
+    background-color:firebrick;
+    position: relative;
+    display:inline-block;
+    margin:0 1em;
+} 
+
+#peopleList{
+    border:1px solid olivedrab;
+    border-radius: 4px;
+    list-style-type: disc;
+    li{
+        margin-left:2em;
+    }
+}
+

@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>HiDapp!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/1.6.2/tailwind.min.css" integrity="sha512-mZ+ZnjWE+WxIG8b8Ilysrfq7stpTrGu53lofHJbhuIe6iYmURmoXlZ4ycMN7qQoMhR3qWzVXF/q4N4UKfwmZeQ==" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="main.min.css" /> 
+</head>
+
+<body>
+    <main>
+        <h1>Hi dApp!</h1>
+        <hr>
+        <div>
+            <p>First, we must connect to the dApp</p>
+            <button id="connectToDapp">Connect to dApp</button>
+
+<code>
+connectButton.addEventListener('click', () => {
+    window.ethereum.enable().then(function (accounts) {
+        connectAccounts(accounts);
+        connectButton.style.display = 'none';
+    });
+});
+</code>
+
+        </div>
+        
+        <section>
+            <h3>Interactions</h3>
+
+            <p>Immediate call to get contract data:
+                <ul>
+                    <li>Address: <span class="infoSpan" id="addressSpan">__</span></li>
+                    <li>Balance: <span class="infoSpan" id="balanceSpan">__</span></li>
+                </ul>
+            </p>
+
+<code>
+myContract.methods.balance().call()
+    .then(function (result) {
+        let value = Web3.utils.fromWei(result, 'ether');
+        document.getElementById('balanceSpan').innerHTML = value +' ETH';
+    });
+</code>
+
+<hr>            
+            <p>Public function (everyone will get the same return)</p>
+            <button class="btn btn-blue" id="sayHello-button">Say hello</button>
+            <span class="infoSpan" id="sayHelloSpan" >__</span>
+            <p class="text-xs">This will call a simple function from the Smart Contract and return a message. (as a "string") </p>
+<code>
+myContract.methods.sayHello().call()
+    .then(function (result) {
+        sayHelloLabel.innerHTML = result;
+    })
+</code>
+<hr>
+            <p>private function onlyOwner </p>
+            <button id="getCreatorButton">Get creator's address</button>
+            <span class="infoSpan" id="getCreatorSpan">__</span>
+            <p class="text-xs">Anyone can call this function, but only the creator of the Smart Contract will get a return of the creator's address. </p>
+<hr>
+
+            <button id="getPersonButton">Get <strong>your</strong> most recent person</button>
+            <span class="infoSpan" id="getPersonSpan">__</span>
+            <p class="text-xs">This will return the most recently created person specific to <b>your</b> current account/wallet/address .</p>
+        </section>
+
+        <section>
+            <h3>Transactions</h3>
+            <p>To create a new person, submit a name and a number.  This will cost 0.1 ETH </p>
+            <div class="mt-3 flex flex-row">
+                <label>Name:</label>
+                <input class="flex-1" id="createName" type="text" placeholder="name" required style="width:80%">
+            </div>
+            <div class="mt-3 flex flex-row">
+                <label>Number:</label>
+                <input class="flex-none" id="createNumber" type="number" max="999" required placeholder="(max 999)" >
+            </div>
+            <div class="mt-3">
+                <button id="createButton">Create Person</button>
+                <div id="transactionLoader" class="opacity-0"> </div>
+                <span class="infoSpan" id="createSpan">__</span>
+            </div>
+
+<code>
+let weiValue = Web3.utils.toWei('0.1', 'ether');                
+myContract.methods.createPerson(createName.value, createNumber.value).send({ 'value': weiValue})
+    .on('transactionHash', function (hash) {
+        console.log(hash);
+        TweenMax.fromTo("#transactionLoader", 2, { rotation: 0 }, { rotation: 360, repeat: -1, ease: Power1.easeInOut, yoyo: true });
+    })
+    .on('receipt', function(receipt) {
+        console.log("on receipt");
+        console.log(receipt);
+        // loader animation
+        TweenMax.to("#transactionLoader", 0.3, { rotation:0, opacity:0 });                        
+        reflectBalance();
+        myContract.methods.getPerson().call()
+            .then(function (result) {
+                console.log(result.name);
+                createLabel.innerHTML = result.name + ' ' + result.number;
+            });
+        })
+    .on('error', function(error, receipt) { 
+        // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
+        console.log("on error receipt");
+        console.log(error, receipt);
+    })
+</code>            
+
+        </section>
+ 
+        
+        <section>
+            <h3>Events</h3>
+            <p>This is an event listener to get the name when a new Person has been created.</p>
+<code>
+myContract.events.personCreated({}, (error, event) => {
+    newestLabel.innerHTML = event.returnValues.name + ' ' + event.returnValues.number;
+    let info = "<a href='https://ropsten.etherscan.io/tx/" + event.returnValues.transactionHash + "' target='_blank'>" + event.returnValues.name + "</a>";
+    addToList(info);
+});
+
+</code>            
+            <span class="infoSpan" id="newestSpan">___</span>            
+
+
+
+            <div>
+                <h3>Complete list of Poeple</h3>
+                <p>This is a really cool feature function to "<strong>getPastEvents()</strong>", so we can get all the people ever created.</p>
+<code>
+myContract.getPastEvents('personCreated', { fromBlock: 0, toBlock: 'latest' })
+    .then(function (event) {
+        let n = event.length;
+        for(var i= 0; i < n; i++){
+            addToList(event[i].returnValues.name);
+        }
+    });
+</code>
+
+
+                <ul id="peopleList">
+                </ul>
+
+
+            </div>
+            
+        </section> 
+
+
+
+
+
+        <section>
+            <h3>Withdraw the funds from this contract.</h3>
+            <button id="withdrawButton">Claim Funds</button>
+            <div id="withdrawLoader" class="opacity-0"></div>
+            <span id="withdrawSpan"></span>
+
+<code>
+console.log('withdraw the funds !');
+myContract.methods.withdrawAll().send()
+    .then(function (result) {
+        console.log(result);
+    }).catch(function (err) {
+        console.log(err);
+        // you crazy.. ain't no way you comin up in here 
+        // claimin all these funds without proper credentials.
+    }) 
+</code>
+            
+        </section>
+
+
+
+
+
+
+
+        <footer class="bg-gray-300 p-4 mt-7">
+            <h3>Links</h3>
+            <ul>
+                <li><a target="_blank" href="https://faucet.ropsten.be/">Ropsten Ethereum Faucet (1/day)</a></li>
+                <li><a target="_blank" href="https://faucet.metamask.io/">Metamask Ropsten Ethereum Faucet (5/hr)</a></li>
+                <li><a target="_blank" href="https://ropsten.etherscan.io/">Ropsten Etherscan</a></li>
+            </ul>
+        </footer>
+
+    </main>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.2.6/dist/web3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.0/gsap.min.js"
+        integrity="sha512-JO6JyFPJupQKZf7icgZkHwuq/rAQxH7COqvEd4WdK52AtHPedwHog05T69pIelI69jVN/zZbW6TuHfH2mS8j/Q=="
+        crossorigin="anonymous"></script>
+    <!-- <script src="main.min.js"></script> -->
+    <script type="module" src="src/main.js"></script>
+
+
+
+
+    
+
+
+</body> 
+</html>
+
