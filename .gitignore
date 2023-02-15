@@ -6,3 +6,4 @@ node_modules/.cache
 /images
 docker-compose.yml
 fabfile.json
+.DS_Store
